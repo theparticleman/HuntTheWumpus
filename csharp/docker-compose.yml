@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: wumpus-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wumpus_root_password
+      MYSQL_DATABASE: wumpus_db
+      MYSQL_USER: wumpus_user
+      MYSQL_PASSWORD: wumpus_password
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - wumpus-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: wumpus-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./WebApp/dist:/usr/share/nginx/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - wumpus-network
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: src/HuntTheWumpus.Api/Dockerfile
+    container_name: wumpus-api
+    restart: always
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=wumpus_db;User=wumpus_user;Password=wumpus_password;
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - wumpus-network
+    depends_on:
+      - mysql
+
+networks:
+  wumpus-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

@@ -1,0 +1,6 @@
+@HuntTheWumpus.Api_HostAddress = http://localhost:5258
+
+GET {{HuntTheWumpus.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
