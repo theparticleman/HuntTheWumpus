@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunt the Wumpus</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🏹 Hunt the Wumpus 🐉</h1>
+            <div class="player-info">
+                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                <button id="newGameBtn">New Game</button>
+            </div>
+        </header>
+
+        <div id="gameArea" class="game-area hidden">
+            <div class="game-stats">
+                <div class="stat">
+                    <span class="label">Room:</span>
+                    <span id="currentRoom">-</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Arrows:</span>
+                    <span id="arrowCount">-</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Score:</span>
+                    <span id="score">-</span>
+                </div>
+            </div>
+
+            <div class="cave-map">
+                <div id="caveVisualization"></div>
+            </div>
+
+            <div class="game-info">
+                <div class="warnings" id="warnings"></div>
+                <div class="messages" id="messages"></div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <h3>Connected Rooms</h3>
+                    <div id="connectedRooms" class="room-buttons"></div>
+                </div>
+                
+                <div class="action-group">
+                    <div class="action">
+                        <label for="moveRoom">Move to room:</label>
+                        <select id="moveRoom">
+                            <option value="">Select room</option>
+                        </select>
+                        <button id="moveBtn">Move</button>
+                    </div>
+                    
+                    <div class="action">
+                        <label for="shootRoom">Shoot arrow at room:</label>
+                        <input type="number" id="shootRoom" min="1" max="20" placeholder="1-20">
+                        <button id="shootBtn">Shoot</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="rules">
+                <h3>🎯 Game Rules</h3>
+                <ul>
+                    <li>Find and kill the Wumpus with your arrows</li>
+                    <li>Avoid falling into pits</li>
+                    <li>Beware of super bats that can transport you</li>
+                    <li>You have 5 arrows - use them wisely!</li>
+                    <li>Listen for clues about nearby dangers</li>
+                </ul>
+            </div>
+
+            <div class="leaderboard">
+                <h3>🏆 Leaderboard</h3>
+                <div id="leaderboardList">Loading...</div>
+            </div>
+
+            <div class="game-history">
+                <h3>📈 Your Games</h3>
+                <div id="gameHistory">Enter your name to see history</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameOverModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">Game Over</h2>
+            <p id="gameOverMessage"></p>
+            <div class="modal-actions">
+                <button id="playAgainBtn">Play Again</button>
+                <button id="closeModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
