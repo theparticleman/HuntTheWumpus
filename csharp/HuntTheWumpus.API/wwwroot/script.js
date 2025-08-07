@@ -212,16 +212,156 @@ class HuntTheWumpusGame {
         const viz = document.getElementById('caveVisualization');
         viz.innerHTML = '';
         
-        // Create a simple grid visualization of rooms 1-20
+        // Reset grid styles and use absolute positioning for dodecahedron layout
+        viz.style.display = 'block';
+        viz.style.position = 'relative';
+        viz.style.width = '600px';
+        viz.style.height = '600px';
+        viz.style.margin = '0 auto';
+        
+        const centerX = 300;
+        const centerY = 300;
+        
+        // Create 3 concentric pentagons based on Cave.cs connectivity
+        // Inner pentagon (inverted): rooms 1-5
+        // Middle pentagon: rooms 6-15 (arranged as two rings of 5)
+        // Outer pentagon: rooms 16-20
+        
+        const roomPositions = {};
+        
+        // Inner pentagon (1-5) - inverted (pointing down)
+        const innerRadius = 60;
+        const innerStartAngle = Math.PI / 2; // Start from bottom
+        for (let i = 0; i < 5; i++) {
+            const angle = innerStartAngle + (i * 2 * Math.PI / 5);
+            const roomNum = i + 1;
+            roomPositions[roomNum] = {
+                x: centerX + innerRadius * Math.cos(angle),
+                y: centerY + innerRadius * Math.sin(angle)
+            };
+        }
+        
+        // Middle pentagon ring 1 (14, 6, 8, 10, 12) - normal orientation
+        const middleRoomOrientation1 = [14, 6, 8, 10, 12];
+        const middleRadius1 = 140;
+        const middleStartAngle1 = -Math.PI / 2 + Math.PI / 5; // Start from top
+        for (let i = 0; i < 5; i++) {
+            const angle = middleStartAngle1 + (i * 2 * Math.PI / 5);
+            const roomNum = middleRoomOrientation1[i];
+            roomPositions[roomNum] = {
+                x: centerX + middleRadius1 * Math.cos(angle),
+                y: centerY + middleRadius1 * Math.sin(angle)
+            };
+        }
+
+        // Middle pentagon ring 2 (7, 9, 11, 13, 15) - offset orientation
+        const middleRoomOrientation2 = [13, 15, 7, 9, 11];
+        const middleRadius2 = 180;
+        const middleStartAngle2 = -Math.PI / 2; // Offset by 36 degrees
+        for (let i = 0; i < 5; i++) {
+            const angle = middleStartAngle2 + (i * 2 * Math.PI / 5);
+            const roomNum = middleRoomOrientation2[i];
+            roomPositions[roomNum] = {
+                x: centerX + middleRadius2 * Math.cos(angle),
+                y: centerY + middleRadius2 * Math.sin(angle)
+            };
+        }
+        
+        // Outer pentagon (16-20) - normal orientation
+        const outerRoomOrientation = [20, 16, 17, 18, 19];
+        const outerRadius = 260;
+        const outerStartAngle = -Math.PI / 2; // Start from top
+        for (let i = 0; i < 5; i++) {
+            const angle = outerStartAngle + (i * 2 * Math.PI / 5);
+            const roomNum = outerRoomOrientation[i];
+            roomPositions[roomNum] = {
+                x: centerX + outerRadius * Math.cos(angle),
+                y: centerY + outerRadius * Math.sin(angle)
+            };
+        }
+
+        // Room connections from Cave.cs
+        const connections = {
+            1: [2, 5, 8], 2: [1, 3, 10], 3: [2, 4, 12], 4: [3, 5, 14], 5: [1, 4, 6],
+            6: [5, 7, 15], 7: [6, 8, 17], 8: [1, 7, 9], 9: [8, 10, 18], 10: [2, 9, 11],
+            11: [10, 12, 19], 12: [3, 11, 13], 13: [12, 14, 20], 14: [4, 13, 15], 15: [6, 14, 16],
+            16: [15, 17, 20], 17: [7, 16, 18], 18: [9, 17, 19], 19: [11, 18, 20], 20: [13, 16, 19]
+        };
+
+        // Create SVG for connection lines
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.position = 'absolute';
+        svg.style.width = '600px';
+        svg.style.height = '600px';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.pointerEvents = 'none';
+        svg.style.zIndex = '1';
+        svg.setAttribute('viewBox', '0 0 600 600');
+        
+        // Draw connection lines
+        const drawnConnections = new Set();
+        for (let roomNum = 1; roomNum <= 20; roomNum++) {
+            const pos1 = roomPositions[roomNum];
+            connections[roomNum].forEach(connectedRoom => {
+                const connectionKey = `${Math.min(roomNum, connectedRoom)}-${Math.max(roomNum, connectedRoom)}`;
+                if (!drawnConnections.has(connectionKey)) {
+                    const pos2 = roomPositions[connectedRoom];
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', pos1.x);
+                    line.setAttribute('y1', pos1.y);
+                    line.setAttribute('x2', pos2.x);
+                    line.setAttribute('y2', pos2.y);
+                    line.setAttribute('stroke', '#ccc');
+                    line.setAttribute('stroke-width', '2');
+                    svg.appendChild(line);
+                    drawnConnections.add(connectionKey);
+                }
+            });
+        }
+        viz.appendChild(svg);
+        
+        // Create room circles
         for (let i = 1; i <= 20; i++) {
             const roomDiv = document.createElement('div');
-            roomDiv.className = 'room';
+            roomDiv.className = 'room dodecahedral';
             roomDiv.textContent = i;
+            
+            // Position the room absolutely
+            const pos = roomPositions[i];
+            roomDiv.style.position = 'absolute';
+            roomDiv.style.left = (pos.x - 20) + 'px';
+            roomDiv.style.top = (pos.y - 20) + 'px';
+            roomDiv.style.width = '40px';
+            roomDiv.style.height = '40px';
+            roomDiv.style.borderRadius = '50%';
+            roomDiv.style.display = 'flex';
+            roomDiv.style.alignItems = 'center';
+            roomDiv.style.justifyContent = 'center';
+            roomDiv.style.fontSize = '14px';
+            roomDiv.style.fontWeight = 'bold';
+            roomDiv.style.border = '2px solid #333';
+            roomDiv.style.backgroundColor = '#f0f0f0';
+            roomDiv.style.zIndex = '2';
             
             if (this.gameState && i === this.gameState.currentRoom) {
                 roomDiv.classList.add('current');
+                roomDiv.style.backgroundColor = '#ff6b6b';
+                roomDiv.style.color = 'white';
+                roomDiv.style.border = '3px solid #ff0000';
+                roomDiv.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.5)';
             } else if (this.gameState && this.gameState.connectedRooms.includes(i)) {
                 roomDiv.classList.add('connected');
+                roomDiv.style.backgroundColor = '#4ecdc4';
+                roomDiv.style.color = 'white';
+                roomDiv.style.border = '2px solid #26a69a';
+                roomDiv.style.cursor = 'pointer';
+                
+                // Add click handler for connected rooms
+                roomDiv.addEventListener('click', () => {
+                    document.getElementById('moveRoom').value = i;
+                    this.movePlayer();
+                });
             }
             
             viz.appendChild(roomDiv);

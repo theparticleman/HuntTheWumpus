@@ -105,7 +105,7 @@ public class Game
         {
             var newRoom = Cave.GetRandomRoom();
             Player.MoveTo(newRoom);
-            return new HazardCheckResult($"Super bats grabbed you and dropped you in room {newRoom.Number}!", false, false);
+            return new HazardCheckResult($"🦇 Super bats grabbed you and dropped you in room {newRoom.Number}! 🦇", false, false);
         }
 
         return new HazardCheckResult("You moved safely.", false, false);
